@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Basic Calculator</title>
+  <style>
+   >
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f3f3f3;
+      margin: 0;
+      padding: 0;
+    }
+
+    .main {
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      max-width: 400px;
+      padding: 20px 30px;
+      margin: 10% auto;
+      background-color: #fff;
+      box-shadow: 0px 4px 10px rgba(0,0,0,0.2);
+    }
+
+    h2 {
+      text-align: center;
+      color: #d9534f;
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin: 10px 0 5px;
+      font-weight: bold;
+    }
+
+    input[type="number"], select {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+
+    input[type="submit"] {
+      width: 100%;
+      padding: 10px;
+      background-color: #d9534f;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    input[type="submit"]:hover {
+      background-color: #c9302c;
+    }
+
+    p {
+      text-align: center;
+      margin-top: 15px;
+      font-size: 16px;
+    }
+
+    b {
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <div class="main">
+    <h2>Basic Calculator</h2>
+    <form method="post" action="\calculate">
+      <label>First Number:</label>
+      <input type="number" name="num1" required><br><br>
+
+      <label>Second Number:</label>
+      <input type="number" name="num2" required><br><br>
+
+      <label>Operation:</label>
+      <select name="operation">
+        <option value="add">Addition</option>
+        <option value="subtract">Subtraction</option>
+        <option value="multiply">Multiplication</option>
+        <option value="divide">Division</option>
+      </select><br><br>
+
+      <input type="submit" value="Calculate">
+    </form>
+    <p><b>Result   </b>{{result}}<p>
+  </div>
+</body>
+</html>
