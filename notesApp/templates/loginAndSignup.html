@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Signup & Login</title>
+  <style>
+    body {
+      font-family: "Poppins", sans-serif;
+      background: linear-gradient(135deg, #6a11cb, #2575fc);
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      width: 350px;
+      background: #fff;
+      padding: 30px 25px;
+      border-radius: 12px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+      text-align: center;
+      animation: fadeIn 0.8s ease-in-out;
+    }
+
+    .container h2 {
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    .input-group {
+      margin-bottom: 15px;
+      text-align: left;
+    }
+
+    .input-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 14px;
+      color: #444;
+    }
+
+    .input-group input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      background: #2575fc;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .btn:hover {
+      background: #1b5ed9;
+    }
+
+    .switch {
+      margin-top: 15px;
+      font-size: 14px;
+      color: #555;
+    }
+
+    .switch a {
+      color: #2575fc;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .switch a:hover {
+      text-decoration: underline;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+    
+    <!-- Login Form -->
+    <div class="container" id="login">
+      <h2>Login</h2>
+      <form action="/login" method="POST">
+        <div class="input-group">
+          <label for="loginEmail">Email</label>
+          <input type="email" id="loginEmail" name="email" required>
+        </div>
+        <div class="input-group">
+          <label for="loginPassword">Password</label>
+          <input type="password" id="loginPassword" name="password" required>
+        </div>
+        <button type="submit" class="btn">Login</button>
+        <div class="switch">
+          Don’t have an account? <a href="#signup">Sign Up</a>
+        </div>
+      </form>
+    </div>
+
+    
+  <!-- Signup Form -->
+  <div class="container" id="signup" style="display: none;">
+    <h2>Create Account</h2>
+    <form action="/signUp" method="POST">
+      <div class="input-group">
+        <label for="name">Full Name</label>
+        <input type="text" id="name" name="fname" required>
+      </div>
+      <div class="input-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" required>
+      </div>
+      <div class="input-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required>
+      </div>
+      <button type="submit" class="btn">Sign Up</button>
+      <div class="switch">
+        Already have an account? <a href="#login">Login</a>
+      </div>
+    </form>
+  </div>
+
+
+  <script>
+    // Switch between Signup and Login
+    document.querySelectorAll(".switch a").forEach(link => {
+      link.addEventListener("click", (e) => {
+        e.preventDefault();
+        document.querySelector("#signup").style.display = link.getAttribute("href") === "#signup" ? "block" : "none";
+        document.querySelector("#login").style.display = link.getAttribute("href") === "#login" ? "block" : "none";
+      });
+    });
+  </script>
+</body>
+</html>

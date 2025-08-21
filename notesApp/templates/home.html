@@ -1,129 +1,189 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Notes App</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Notes App</title>
 
-    <!-- Internal CSS -->
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f4f6f9;
-            margin: 0;
-            padding: 20px;
-        }
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #eef2f7;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
 
-        .main {
-            min-height: 400px;
-            max-width: 700px;
-            margin: auto;
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0px 3px 8px rgba(0,0,0,0.1);
-        }
+    /* Navbar */
+    .navbar {
+      background: #007bff;
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 30px;
+      box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.2);
+    }
 
-        h1 {
-            text-align: center;
-            color: #333;
-        }
+    .navbar .left {
+      font-size: 18px;
+      font-weight: bold;
+    }
 
-        form {
-            margin-bottom: 20px;
-        }
+    .navbar .right form {
+      margin: 0;
+    }
 
-        input, textarea {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 12px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
+    .navbar button {
+      background: #ff4d4d;
+      color: white;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
 
-        button {
-            background: #007BFF;
-            color: white;
-            padding: 8px 14px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
+    .navbar button:hover {
+      background: #d93636;
+    }
 
-        button:hover {
-            background: #0056b3;
-        }
+    /* Main Container */
+    .main {
+      max-width: 800px;
+      margin: 40px auto;
+      background: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-        }
+    h1 {
+      text-align: center;
+      color: #222;
+      margin-bottom: 20px;
+    }
 
-        th, td {
-            border: 1px solid #ddd;
-            padding: 10px;
-            text-align: center;
-        }
+    form {
+      margin-bottom: 25px;
+    }
 
-        th {
-            background: #007BFF;
-            color: white;
-        }
+    input,
+    textarea {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 15px;
+    }
 
-        tr:nth-child(even) {
-            background: #f9f9f9;
-        }
+    button {
+      background: #007bff;
+      color: white;
+      padding: 10px 18px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 15px;
+    }
 
-        .msg {
-            text-align: center;
-            color: green;
-            font-weight: bold;
-        }
-    </style>
+    button:hover {
+      background: #0056b3;
+    }
+
+    /* Notes Table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      font-size: 15px;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 12px;
+      text-align: center;
+    }
+
+    th {
+      background: #007bff;
+      color: white;
+    }
+
+    tr:nth-child(even) {
+      background: #f9f9f9;
+    }
+
+    .msg {
+      text-align: center;
+      color: green;
+      font-weight: bold;
+      margin-bottom: 15px;
+    }
+  </style>
 </head>
 <body>
-    <div class="main">
-        <h1>Notes App</h1>
 
-        <!-- Message -->
-        {% if message %}
-            <p class="msg">{{ message }}</p>
-        {% endif %}
-
-        <!-- Form -->
-        <form method="POST" action="notesApp">
-            <input name="title" type="text" placeholder="Title" required>
-            <textarea name="content" placeholder="Write your note..." required></textarea>
-            <button class="add-btn" type="submit">Add Note</button>
-        </form>
-
-        <hr><br>
-
-        <!-- Notes Table -->
-        <table>
-            <tr>
-                <th>No.</th>
-                <th>Title</th>
-                <th>Content</th>
-                <th>Action</th>
-                <th>Action</th>
-            </tr>
-
-            {% for item in items %}
-            <tr>
-                <td>{{ loop.index }}</td>
-                <td>{{ item[1] }}</td> <!-- Title -->
-                <td>{{ item[2] }}</td> <!-- Content -->
-                <td><button>Edit</button></td>
-                <td><form method="POST" action="delete/{{item[0]}}" style="display:inline;"><button type='submit'>Delete</button><form></td>
-            </tr>
-            {% else %}
-            <tr>
-                <td colspan="5">No notes yet!</td>
-            </tr>
-            {% endfor %}
-        </table>
+  <!-- Navbar -->
+  <div class="navbar">
+    <div class="left">Hello, {{ session['fname'] }}</div>
+    <div class="right">
+      <form action="{{ url_for('logout') }}" method="GET">
+        <button type="submit">Logout</button>
+      </form>
     </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main">
+    <h1>Notes App</h1>
+
+    {% if message %}
+    <p class="msg">{{ message }}</p>
+    {% endif %}
+
+    <!-- Add Note Form -->
+    <form method="POST" action="{{ url_for('notesApp') }}">
+      <input name="title" type="text" placeholder="Title" required />
+      <textarea name="content" placeholder="Write your note..." required></textarea>
+      <button type="submit">Add Note</button>
+    </form>
+
+    <hr />
+
+    <!-- Notes Table -->
+    <table>
+      <tr>
+        <th>No.</th>
+        <th>Title</th>
+        <th>Content</th>
+        <th>Edit</th>
+        <th>Delete</th>
+      </tr>
+
+      {% for item in items %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td>{{ item[1] }}</td>
+        <td>{{ item[2] }}</td>
+        <td>
+          <form action="{{ url_for('editPage', id=item[0]) }}" method="GET">
+            <button type="submit" style="margin-top:20px">Edit</button>
+          </form>
+        </td>
+        <td>
+          <form method="POST" action="{{ url_for('delete', id=item[0]) }}" style="display:inline;">
+            <button type="submit">Delete</button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="5">No notes yet!</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+
 </body>
 </html>
