@@ -1,12 +1,26 @@
-from flask import Flask, render_template, request, redirect, url_for, session
-from flask_bcrypt import Bcrypt
-import sqlite3
+from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask_mail import Mail, Message
+from werkzeug.security import generate_password_hash, check_password_hash
+import sqlite3, random
+import logging
 
 
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'    # secret key used to sign session cookies
-bcrypt = Bcrypt(app)
 
+# ====== Flask-Mail Configuration ======
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'          # SMTP server address
+app.config['MAIL_PORT'] = 587                         # Port for TLS
+app.config['MAIL_USE_TLS'] = True                     # Enable TLS encryption
+app.config['MAIL_USE_SSL'] = False                    # Disable SSL (can't use both)
+app.config['MAIL_USERNAME'] = "s123onuu@gmail.com"    # sender email
+app.config['MAIL_PASSWORD'] = "kobaejjltgxbiyea"      # Gmail App Password
+app.config['MAIL_DEFAULT_SENDER'] = "s123onuu@gmail.com"
+
+print("MAIL_USERNAME:", app.config['MAIL_USERNAME'])
+print("MAIL_PASSWORD:", app.config['MAIL_PASSWORD'])
+
+mail = Mail(app)  # Initialize Flask-Mail with app
 
 def init_db():
     try:
@@ -54,7 +68,11 @@ def init_db():
 # startPage -> render login page
 @app.route('/')
 def startPage():
-    return render_template("loginAndSignup.html")
+    return render_template("login.html")
+
+@app.route('/signup/')
+def signupPage():
+    return render_template("signup.html")
 
 # home page with add notes form and notes display functionslity
 @app.route('/home')
@@ -68,7 +86,97 @@ def home():
     cursor.execute("select id, title, content from mynotes where userId = ? ORDER BY id DESC", (session["userId"],))
     notes = cursor.fetchall()
     conn.close()
-    return render_template("home.html", items=notes)
+    return render_template("home.html", items=notes ,fname=session.get("fname"))
+
+
+# ---------------- SIGNUP WITH OTP ---------------- #
+@app.route('/send_otp', methods=["GET", "POST"])
+def send_otp():
+    fname = request.form.get("fname")
+    email = request.form.get("email")
+    password = request.form.get("password")
+    confirm_password = request.form.get("confirm_password")
+
+    if password != confirm_password:
+        flash("Passwords do not match!", "error")
+        return redirect(url_for("signupPage"))
+
+    # Save user info temporarily in session
+    session['fname'] = fname
+    session['email'] = email
+    session['password'] = generate_password_hash(password)  # Hash password
+
+    otp = random.randint(100000, 999999)
+    session['otp'] = str(otp)  # Store as string for comparison
+
+    try:
+        msg = Message(subject='Your OTP Code',
+                      recipients=[email])
+        msg.body = f'Your OTP code is: {otp}'
+        mail.send(msg)
+        flash("OTP sent successfully! Check your email.", "info")
+        return render_template("signup.html")
+  # FIX: Redirect to OTP entry page
+    except Exception as e:
+        flash(f"Error sending OTP: {str(e)}", "error")
+        return redirect(url_for("signupPage"))
+
+
+
+# verify otp
+@app.route('/verify_otp', methods=["POST"])
+def verify_otp():
+    entered_otp = request.form.get("otp")
+
+    if entered_otp == session.get('otp'):
+        # Insert user into database
+        conn = sqlite3.connect('notes.db')
+        cursor = conn.cursor()
+        cursor.execute('''
+            INSERT INTO users (fname, email, password)
+            VALUES (?, ?, ?)
+        ''', (session['fname'], session['email'], session['password']))
+        conn.commit()
+        conn.close()
+
+        flash("Account created successfully! You can now log in.", "success")
+        session.clear()
+        return redirect(url_for("login"))
+    else:
+        flash("Invalid OTP! Please try again.", "error")
+        return render_template("signup.html")  # FIX: Stay on OTP page if failed
+
+# ---------------- LOGIN ---------------- #
+@app.route('/login/', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        try:
+            email = request.form.get('email')
+            password = request.form.get('password')
+
+            conn = sqlite3.connect('notes.db')
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM users WHERE email=?", (email,))
+            user = cursor.fetchone()
+            conn.close()
+
+            if user and check_password_hash(user[3], password):
+                session['userId'] = user[0]
+                session['fname'] = user[1]
+                session['email'] = user[2]
+                return redirect(url_for('home'))
+            else:
+                flash("Incorrect email or password!", "error")
+        except sqlite3.Error as e:
+            flash(f"Database error: {e}", "error")
+
+    return render_template("login.html")
+
+# ---------------- LOGOUT ---------------- #
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('startPage'))
 
 
 # ADD notes
@@ -165,78 +273,6 @@ def closeEdit():
     if "userId" not in session:
         return redirect(url_for("startPage"))  # or your login page
     return redirect(url_for("home", id=session["userId"]))
-
-
-    
-
-# sign up (register user)
-@app.route('/signUp/', methods=["GET", "POST"])
-def registerUser():
-    try:
-        if request.method == 'POST':
-            fname = request.form.get('fname')
-            email = request.form.get('email')
-            password = request.form.get('password')
-            
-            # hashing the password before storing in db 
-            hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
-            
-            conn = sqlite3.connect('notes.db')
-            cursor = conn.cursor()
-            cursor.execute("INSERT INTO users(fname, email, password) VALUES(?, ?, ?)",(fname, email, hashed_password))
-            conn.commit()
-            return redirect(url_for('login'))            
-            
-    
-    except sqlite3.Error as e:
-        return f"Database error: {e}"
-    
-    finally:
-        if conn:
-            conn.close()
-    
-    return render_template("loginAndSignup.html")
-
-     
-
-# login user
-@app.route('/login/', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        try:
-            email = request.form.get('email')
-            password = request.form.get('password')
-            
-            conn = sqlite3.connect('notes.db')
-            cursor = conn.cursor()
-            cursor.execute("SELECT * from users WHERE email = ?", (email,))
-            user = cursor.fetchone()
-            conn.close()
-            
-            if user is None:
-                return "incorrect email or password"
-            
-            # verify password
-            if user and bcrypt.check_password_hash(user[3], password):
-                session['userId'] = user[0]
-                session['fname'] = user[1]
-                return redirect(url_for('home', id=session['userId']))
-            else:
-                return "incorrect email or password"
-                
-        except sqlite3.Error as e:
-            return f"database error: {e}"
-    
-    return render_template("loginAndSignup.html") 
-
-
-# logout user
-@app.route('/logout')
-def logout():
-    # Clear the session to log the user out
-    session.clear()
-    # Redirect to the login page (startPage)
-    return redirect(url_for('startPage'))
 
     
 if __name__ == "__main__":

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signup with OTP Verification</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 400px;
+            margin: 50px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            text-align: center;
+        }
+        input[type="text"], input[type="email"], input[type="password"], input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            width: 100%;
+            background: #007BFF;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .hidden {
+            display: none;
+        }
+        .flash {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .flash.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .flash.info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Signup</h2>
+
+    <!-- Display Flask Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <!-- Signup Form -->
+    <form action="{{ url_for('send_otp') }}" method="POST" id="signupForm" {% if session.get('otp') %}class="hidden"{% endif %}>
+        <input type="text" name="fname" placeholder="Full Name" required>
+        <input type="email" name="email" placeholder="Email Address" required>
+        <input type="password" name="password" placeholder="Password" required>
+        <input type="password" name="confirm_password" placeholder="Confirm Password" required>
+        <button type="submit">Send OTP</button>
+    </form>
+
+    <!-- OTP Verification Form -->
+    <form action="{{ url_for('verify_otp') }}" method="POST" id="otpForm" {% if not session.get('otp') %}class="hidden"{% endif %}>
+        <h3>Verify OTP</h3>
+        <input type="number" name="otp" placeholder="Enter OTP" required>
+        <button type="submit">Verify</button>
+    </form>
+</div>
+
+</body>
+</html>
