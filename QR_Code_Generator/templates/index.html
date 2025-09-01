@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QR Code Generator</title>
+  </head>
+  <body>
+    <h1>Welcome to the QR Code Generator!</h1>
+    <p>"Turn Any Information into a QR Code Instantly."</p>
+    {% if msg in form.error %} {% endif %}
+    <form action="/" method="POST">
+      <input id="csrf_token" name="csrf_token" type="hidden" />
+      <label for="inputText">Enter Text or URL</label><br />
+      <input id="inputText" name="inputText" type="text" value="" />
+    </form>
+  </body>
+</html>
