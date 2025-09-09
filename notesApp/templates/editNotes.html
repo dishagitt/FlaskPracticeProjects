@@ -1,116 +1,143 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Edit Notes</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Edit Notes</title>
 
-  <!-- Internal CSS -->
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f6f9;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-    }
+    <!-- Internal CSS -->
+<style>
+  body {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #e3f2fd, #f9f9f9);
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+  }
 
-    .main {
-      background: #fff;
-      padding: 25px;
-      width: 400px;
-      border-radius: 10px;
-      box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
-    }
+  .main {
+    background: #fff;
+    padding: 30px;
+    width: 420px;
+    border-radius: 14px;
+    box-shadow: 0px 6px 16px rgba(0, 0, 0, 0.15);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
 
-    h1 {
-      text-align: center;
-      margin-bottom: 20px;
-      font-size: 22px;
-      color: #333;
-    }
+  .main:hover {
+    transform: translateY(-3px);
+    box-shadow: 0px 10px 24px rgba(0, 0, 0, 0.2);
+  }
 
-    form {
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-    }
+  h1 {
+    text-align: center;
+    margin-bottom: 25px;
+    font-size: 24px;
+    color: #222;
+    letter-spacing: 0.5px;
+  }
 
-    input[type="text"],
-    textarea {
-      width: 100%;
-      padding: 10px 12px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      font-size: 14px;
-      transition: border-color 0.2s;
-    }
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
 
-    input[type="text"]:focus,
-    textarea:focus {
-      border-color: #007bff;
-      outline: none;
-    }
+  input[type="text"],
+  textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 15px;
+    transition: all 0.3s ease;
+  }
 
-    textarea {
-      resize: vertical;
-      min-height: 100px;
-    }
+  input[type="text"]:focus,
+  textarea:focus {
+    border-color: #007bff;
+    box-shadow: 0px 0px 8px rgba(0, 123, 255, 0.3);
+    outline: none;
+  }
 
-    .btn-group {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-    }
+  textarea {
+    resize: vertical;
+    min-height: 120px;
+  }
 
-    button {
-      padding: 10px;
-      border: none;
-      border-radius: 6px;
-      font-size: 14px;
-      cursor: pointer;
-      transition: background 0.3s;
-      flex: 1;
-    }
+  .btn-group {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+  }
 
-    .save-btn {
-      background: #007bff;
-      color: white;
-    }
+  button {
+    padding: 12px;
+    border: none;
+    border-radius: 25px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex: 1;
+  }
 
-    .save-btn:hover {
-      background: #0056b3;
-    }
+  .save-btn {
+    background: linear-gradient(90deg, #007bff, #0056b3);
+    color: white;
+    box-shadow: 0px 4px 10px rgba(0, 91, 187, 0.3);
+  }
 
-    .close-btn {
-      background: #ccc;
-      color: black;
-    }
+  .save-btn:hover {
+    background: linear-gradient(90deg, #0056b3, #004099);
+    transform: translateY(-2px);
+  }
 
-    .close-btn:hover {
-      background: #999;
-    }
-  </style>
-</head>
-<body>
-  <div class="main">
-    <h1>Edit Note</h1>
-    
-    {% for item in items %}
-    <form method="POST" action="{{url_for('updateNote', id=item[0])}}">
-      <input name="title" value="{{item[2]}}" type="text" placeholder="Title" required />
-      <textarea name="content" placeholder="Write your note..." required>{{item[3]}}</textarea>
-      <div class="btn-group">
-        <button class="save-btn" type="submit">Save</button>
-        <form action="{{ url_for('closeEdit') }}" method="GET">
-          <button type="submit" class="close-btn">Close</button>
-        </form>
-      </div>
-    </form>
-    {% endfor %}
-  </div>
-</body>
+  .close-btn {
+    background: #e0e0e0;
+    color: #333;
+    box-shadow: 0px 4px 10px rgba(180, 180, 180, 0.3);
+  }
+
+  .close-btn:hover {
+    background: #bbb;
+    transform: translateY(-2px);
+  }
+</style>
+
+  </head>
+  <body>
+    <div class="main">
+      <h1>Edit Note</h1>
+
+      {% for item in items %}
+      <form method="POST" action="{{url_for('updateNote', id=item[0])}}">
+        <input
+          name="title"
+          value="{{item[2]}}"
+          type="text"
+          placeholder="Title"
+          required
+        />
+        <textarea name="content" placeholder="Write your note..." required>
+        {{item[3]}}
+        </textarea>
+        <div class="btn-group">
+          <button class="save-btn" type="submit">Save</button>
+
+          <button
+            type="button"
+            class="close-btn"
+            onclick="window.location='{{ url_for('closeEdit') }}'"
+          >
+            Close
+          </button>
+        </div>
+      </form>
+      {% endfor %}
+    </div>
+  </body>
 </html>

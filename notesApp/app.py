@@ -2,7 +2,6 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 from flask_mail import Mail, Message
 from werkzeug.security import generate_password_hash, check_password_hash
 import sqlite3, random
-import logging
 
 
 app = Flask(__name__)
@@ -16,9 +15,6 @@ app.config['MAIL_USE_SSL'] = False                    # Disable SSL (can't use b
 app.config['MAIL_USERNAME'] = "s123onuu@gmail.com"    # sender email
 app.config['MAIL_PASSWORD'] = "kobaejjltgxbiyea"      # Gmail App Password
 app.config['MAIL_DEFAULT_SENDER'] = "s123onuu@gmail.com"
-
-print("MAIL_USERNAME:", app.config['MAIL_USERNAME'])
-print("MAIL_PASSWORD:", app.config['MAIL_PASSWORD'])
 
 mail = Mail(app)  # Initialize Flask-Mail with app
 
@@ -115,7 +111,7 @@ def send_otp():
         msg.body = f'Your OTP code is: {otp}'
         mail.send(msg)
         flash("OTP sent successfully! Check your email.", "info")
-        return render_template("signup.html")
+        return render_template("verifyOTP.html", reset = False)
   # FIX: Redirect to OTP entry page
     except Exception as e:
         flash(f"Error sending OTP: {str(e)}", "error")
@@ -144,7 +140,8 @@ def verify_otp():
         return redirect(url_for("login"))
     else:
         flash("Invalid OTP! Please try again.", "error")
-        return render_template("signup.html")  # FIX: Stay on OTP page if failed
+        return render_template("verifyOTP.html")  # FIX: Stay on OTP page if failed
+
 
 # ---------------- LOGIN ---------------- #
 @app.route('/login/', methods=['GET', 'POST'])
@@ -274,7 +271,100 @@ def closeEdit():
         return redirect(url_for("startPage"))  # or your login page
     return redirect(url_for("home", id=session["userId"]))
 
-    
+
+# reset page (get user email to send otp)
+@app.route("/reset", methods=["GET"])
+def resetPage():
+    return render_template("reset.html")
+
+# ---------------- RESET PASSWORD WITH OTP ---------------- #
+@app.route('/send_reset_otp', methods=["POST"])
+def send_reset_otp():
+    email = request.form.get("email")
+
+    # Check if email exists in DB
+    conn = sqlite3.connect('notes.db')
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM users WHERE email = ?", (email,))
+    user = cursor.fetchone()
+    conn.close()
+
+    if not user:
+        flash("Email not registered!", "error")
+        return redirect(url_for("resetPage"))
+
+    session['reset_email'] = email
+
+    otp = random.randint(100000, 999999)
+    session['otp'] = str(otp)
+
+    try:
+        msg = Message(subject='Password Reset OTP',
+                      recipients=[email])
+        msg.body = f'Your OTP code is: {otp}'
+        mail.send(msg)
+        flash("Reset OTP sent! Check your email.", "info")
+
+        # 👉 Load OTP page for reset
+        return render_template("verifyOTP.html", reset=True)
+
+    except Exception as e:
+        flash(f"Error sending OTP: {str(e)}", "error")
+        return redirect(url_for("resetPage"))
+
+
+@app.route('/verify_reset_otp', methods=["POST"])
+def verify_reset_otp():
+    entered_otp = request.form.get("otp")
+
+    if entered_otp == session.get('otp'):
+        flash("OTP verified! Please reset your password.", "success")
+        return redirect(url_for("new_password_page"))  # a form to set new password
+    else:
+        flash("Invalid OTP! Please try again.", "error")
+        return render_template("verifyOTP.html", reset=True)
+
+
+# reset new password page
+@app.route('/new_password', methods=["GET"])
+def new_password_page():
+    return render_template("resetPassword.html")
+
+ # reset new password in db
+@app.route('/update_password', methods=["POST"])
+def update_password():
+    password = request.form.get("password")
+    confirm_password = request.form.get("confirm_password")
+
+    if password != confirm_password:
+        flash("Passwords do not match!", "error")
+        return redirect(url_for("new_password_page"))
+
+    email = session.get('reset_email')
+    if not email:
+        flash("Session expired. Please try again.", "error")
+        return redirect(url_for("login"))
+
+    hashed_password = generate_password_hash(password)
+
+    conn = sqlite3.connect('notes.db')
+    cursor = conn.cursor()
+    cursor.execute("UPDATE users SET password = ? WHERE email = ?", (hashed_password, email))
+    conn.commit()
+    conn.close()
+
+    flash("Password updated successfully! You can now log in.", "success")
+    session.clear()
+    return redirect(url_for("login"))
+
+
+
+# change password page
+@app.route('/change_password_page')
+def change_password_page():
+    pass
+
+
 if __name__ == "__main__":
     init_db()
     app.run(debug=True)
