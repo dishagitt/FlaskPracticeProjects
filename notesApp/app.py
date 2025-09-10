@@ -330,9 +330,10 @@ def verify_reset_otp():
 def new_password_page():
     return render_template("resetPassword.html")
 
+
  # reset new password in db
 @app.route('/update_password', methods=["POST"])
-def update_password():
+def reset_password():
     password = request.form.get("password")
     confirm_password = request.form.get("confirm_password")
 
@@ -355,14 +356,54 @@ def update_password():
 
     flash("Password updated successfully! You can now log in.", "success")
     session.clear()
+   
     return redirect(url_for("login"))
 
 
 
 # change password page
-@app.route('/change_password_page')
-def change_password_page():
-    pass
+@app.route('/change_password', methods = ['POST'])
+def change_password():
+    userId = session["userId"]
+
+    if 'userId' not in session:
+        flash("You must be logged in.", "error")
+        return redirect(url_for('login'))
+
+    current = request.form.get('current_password')
+    newpass = request.form.get('new_password')
+    confirm = request.form.get('confirm_password')
+
+    if not current or not newpass or not confirm:
+        flash("All fields are required.", "error")
+        return redirect(url_for('home'))
+
+    conn = sqlite3.connect('notes.db')
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT password FROM users WHERE id = ?", (userId,))
+    row = cursor.fetchone()
+
+    if not row:
+        flash("User not found.", "error")
+        return redirect(url_for('home'))
+
+    storedpass = row[0]
+    if not check_password_hash(storedpass, current):
+        flash("Incorrect Current Password", "error")
+        return redirect(url_for('home'))
+    
+    if newpass != confirm:
+        flash("Confirm password do not match", "error")
+        return redirect(url_for('home'))
+
+    new_hashed_password = generate_password_hash(newpass)
+    cursor.execute("UPDATE users SET password = ? WHERE id = ?", (new_hashed_password, userId))
+    conn.commit()
+    conn.close()
+    flash("Chnaged password successfully!", "info")
+    return redirect(url_for('home'))
+
 
 
 if __name__ == "__main__":
