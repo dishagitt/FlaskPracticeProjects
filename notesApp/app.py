@@ -1,11 +1,29 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from flask_mail import Mail, Message
 from werkzeug.security import generate_password_hash, check_password_hash
-import sqlite3, random
+import sqlite3, random, os
+from google_auth_oauthlib.flow import Flow
+from pip._vendor import cachecontrol
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
+import requests
+import pathlib
 
 
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'    # secret key used to sign session cookies
+
+GOOGLE_CLIENT_ID = "985107998231-t9npo138pgpa5canvhms2estc292qea8.apps.googleusercontent.com"
+CLIENT_SECRETS_FILE = os.path.join(pathlib.Path(__file__).parent, "client_secret.json")
+
+os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+
+flow = Flow.from_client_secrets_file(
+    client_secrets_file=CLIENT_SECRETS_FILE,
+    scopes=["openid", "https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/userinfo.profile"],
+    redirect_uri="http://127.0.0.1:5000/callback"
+)
+
 
 # ====== Flask-Mail Configuration ======
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'          # SMTP server address
@@ -169,6 +187,64 @@ def login():
 
     return render_template("login.html")
 
+
+# Login with Google
+@app.route("/google-login")
+def google_login():
+    authorization_url, state = flow.authorization_url()
+    session["state"] = state
+    return redirect(authorization_url)
+
+
+# callback function for google login
+@app.route("/callback")
+def callback():
+    flow.fetch_token(authorization_response=request.url)
+
+    if not session["state"] == request.args["state"]:
+        return "State mismatch. Possible CSRF attack.", 400
+
+    credentials = flow.credentials
+
+    # Verify Google ID token
+    id_info = id_token.verify_oauth2_token(
+    id_token=credentials._id_token,
+    request=google_requests.Request(),   # just pass it, don’t call again
+    audience=GOOGLE_CLIENT_ID
+)
+
+    # Extract user info
+    email = id_info.get("email")
+    fname = id_info.get("name")
+
+    # Check if user exists in DB
+    conn = sqlite3.connect('notes.db')
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM users WHERE email=?", (email,))
+    user = cursor.fetchone()
+
+    if not user:
+        # If new Google user → insert into DB with a dummy password
+        cursor.execute(
+            "INSERT INTO users (fname, email, password) VALUES (?, ?, ?)",
+            (fname, email, generate_password_hash(os.urandom(16).hex()))
+        )
+        conn.commit()
+        cursor.execute("SELECT * FROM users WHERE email=?", (email,))
+        user = cursor.fetchone()
+
+    conn.close()
+
+    # Log user in
+    session["userId"] = user[0]
+    session["fname"] = user[1]
+    session["email"] = user[2]
+
+    flash("Logged in with Google successfully!", "info")
+    return redirect(url_for("home"))
+
+
+
 # ---------------- LOGOUT ---------------- #
 @app.route('/logout')
 def logout():
@@ -305,7 +381,7 @@ def send_reset_otp():
         mail.send(msg)
         flash("Reset OTP sent! Check your email.", "info")
 
-        # 👉 Load OTP page for reset
+        # Load OTP page for reset
         return render_template("verifyOTP.html", reset=True)
 
     except Exception as e:

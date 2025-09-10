@@ -1,144 +1,159 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login</title>
-<style>
-  body {
-    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #74ebd5, #9face6);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
-  }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #74ebd5, #9face6);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+      }
 
-  .form-container {
-    background: #fff;
-    padding: 35px 30px;
-    border-radius: 14px;
-    box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.15);
-    width: 320px;
-    text-align: center;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-  }
+      .form-container {
+        background: #fff;
+        padding: 35px 30px;
+        border-radius: 14px;
+        box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.15);
+        width: 320px;
+        text-align: center;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
 
-  .form-container:hover {
-    transform: translateY(-4px);
-    box-shadow: 0px 12px 28px rgba(0, 0, 0, 0.2);
-  }
+      .form-container:hover {
+        transform: translateY(-4px);
+        box-shadow: 0px 12px 28px rgba(0, 0, 0, 0.2);
+      }
 
-  h2 {
-    margin-bottom: 22px;
-    font-size: 26px;
-    color: #222;
-    letter-spacing: 1px;
-  }
+      h2 {
+        margin-bottom: 22px;
+        font-size: 26px;
+        color: #222;
+        letter-spacing: 1px;
+      }
 
-  input {
-    width: 90%;
-    padding: 12px 14px;
-    margin: 12px 0;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    font-size: 15px;
-    transition: border 0.3s ease, box-shadow 0.3s ease;
-  }
+      input {
+        width: 90%;
+        padding: 12px 14px;
+        margin: 12px 0;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        font-size: 15px;
+        transition: border 0.3s ease, box-shadow 0.3s ease;
+      }
 
-  input:focus {
-    border-color: #007bff;
-    box-shadow: 0px 0px 8px rgba(0, 123, 255, 0.3);
-    outline: none;
-  }
+      input:focus {
+        border-color: #007bff;
+        box-shadow: 0px 0px 8px rgba(0, 123, 255, 0.3);
+        outline: none;
+      }
 
-  button {
-    width: 100%;
-    padding: 12px;
-    background: linear-gradient(90deg, #007bff, #0056b3);
-    color: #fff;
-    border: none;
-    border-radius: 25px;
-    cursor: pointer;
-    font-size: 16px;
-    font-weight: 500;
-    margin-top: 10px;
-    transition: all 0.3s ease;
-    box-shadow: 0px 4px 12px rgba(0, 91, 187, 0.4);
-  }
+      button {
+        width: 100%;
+        padding: 12px;
+        background: linear-gradient(90deg, #007bff, #0056b3);
+        color: #fff;
+        border: none;
+        border-radius: 25px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: 500;
+        margin-top: 10px;
+        transition: all 0.3s ease;
+        box-shadow: 0px 4px 12px rgba(0, 91, 187, 0.4);
+      }
 
-  button:hover {
-    background: linear-gradient(90deg, #0056b3, #004099);
-    transform: translateY(-2px);
-    box-shadow: 0px 6px 14px rgba(0, 91, 187, 0.5);
-  }
+      button:hover {
+        background: linear-gradient(90deg, #0056b3, #004099);
+        transform: translateY(-2px);
+        box-shadow: 0px 6px 14px rgba(0, 91, 187, 0.5);
+      }
 
-.reset {
-  display: block;       
-  text-align: left;     
-  margin: 10px 0px 18px 5px; 
-  color: #2575fc;
-  text-decoration: none;
-  font-weight: 600;
-  transition: color 0.2s ease;
-}
+      .reset {
+        display: block;
+        text-align: left;
+        margin: 0px 0px 18px 5px;
+        color: #2575fc;
+        text-decoration: none;
+        font-weight: 400;
+        transition: color 0.2s ease;
+      }
 
-.reset:hover {
-  color: #004099;
-  text-decoration: underline;
-}
+      .reset:hover {
+        color: #004099;
+        text-decoration: underline;
+      }
 
-  p {
-    margin-top: 18px;
-    font-size: 14px;
-    color: #555;
-  }
+      p {
+        margin-top: 18px;
+        font-size: 14px;
+        color: #555;
+      }
 
-  /* Flash messages */
-  .flash {
-    margin: 12px 0;
-    padding: 12px;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 500;
-    text-align: left;
-    box-shadow: 0px 2px 6px rgba(0,0,0,0.1);
-  }
+      /* Flash messages */
+      .flash {
+        margin: 12px 0;
+        padding: 12px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        text-align: left;
+        box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
+      }
 
-  .flash.error {
-    background: #f8d7da;
-    color: #721c24;
-    border-left: 5px solid #f5c2c7;
-  }
+      .flash.error {
+        background: #f8d7da;
+        color: #721c24;
+        border-left: 5px solid #f5c2c7;
+      }
 
-  .flash.info {
-    background: #d1ecf1;
-    color: #0c5460;
-    border-left: 5px solid #bee5eb;
-  }
-</style>
+      .flash.info {
+        background: #d1ecf1;
+        color: #0c5460;
+        border-left: 5px solid #bee5eb;
+      }
+      .google {
+        background: linear-gradient(90deg, #00c573ff, #1d568bff);
+      }
+       .google:hover {
+        background: linear-gradient(90deg, #00f899ff, #005272ff);
+        transform: translateY(-2px);
+        box-shadow: 0px 6px 14px rgba(6, 199, 247, 0.5);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="form-container">
+      <h2>Login</h2>
+      <!-- Display Flask Flash Messages -->
+      {% with messages = get_flashed_messages(with_categories=true) %} {% if
+      messages %} {% for category, message in messages %}
+      <div class="flash {{ category }}">{{ message }}</div>
+      {% endfor %} {% endif %} {% endwith %}
 
-</head>
-<body>
-  <div class="form-container">
-    <h2>Login</h2>
-        <!-- Display Flask Flash Messages -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% for category,   message in messages %}
-          <div class="flash {{ category }}">{{ message }}</div>
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
-
-    <form action="{{ url_for('login') }}" method="POST">
-      <input type="email" name="email" placeholder="Email" required>
-      <input type="password" name="password" placeholder="Password" required>
-      <a href="{{ url_for('resetPage')}}" class="reset">Forgot Paasword?</a>
-      <button type="submit">Login</button>
-    </form>
-    <p>Don't have an account?  <a class="link" href="{{ url_for('signupPage') }}">Sign Up</a></p>
-  </div>
-</body>
+      <form action="{{ url_for('login') }}" method="POST">
+        <input type="email" name="email" placeholder="Email" required />
+        <input
+          type="password"
+          name="password"
+          placeholder="Password"
+          required
+        />
+        <a href="{{ url_for('resetPage')}}" class="reset">Forgot Paasword?</a>
+        <button type="submit">Login</button>
+        <a href="{{ url_for('google_login') }}">
+          <button class="google" type="button">Sign in with Google</button>
+        </a>
+      </form>
+      <p>
+        Don't have an account?
+        <a class="link" href="{{ url_for('signupPage') }}">Sign Up</a>
+      </p>
+    </div>
+  </body>
 </html>
