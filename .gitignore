@@ -1,2 +1,3 @@
-# client secret file of OAuth
+# Ignore Google OAuth secrets
 client_secret.json
+notesApp/client_secret.json
